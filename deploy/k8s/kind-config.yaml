@@ -1,0 +1,17 @@
+# Tier 2: Kind cluster configuration for integration testing
+# Usage: make k8s-up / make k8s-down
+
+kind: Cluster
+apiVersion: kind.x-k8s.io/v1alpha4
+name: kafka-integration
+nodes:
+  - role: control-plane
+    extraPortMappings:
+      # NodePort for Kafka external access (optional)
+      - containerPort: 30092
+        hostPort: 30092
+        protocol: TCP
+      # NodePort for additional services if needed
+      - containerPort: 30093
+        hostPort: 30093
+        protocol: TCP
