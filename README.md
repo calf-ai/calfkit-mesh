@@ -11,6 +11,8 @@ Provides two-tier Kafka environments using KRaft:
 
 ## Quick Start
 
+### Start up the broker (using Docker)
+
 ```bash
 # Start Kafka for local development
 make dev-up
@@ -21,7 +23,7 @@ make dev-up
 make dev-down
 ```
 
-## Kafka UI
+## Kafka UI (optional)
 
 ```bash
 # Start Kafka UI (connects to existing broker at localhost:9092)
