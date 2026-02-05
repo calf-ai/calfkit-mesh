@@ -1,5 +1,4 @@
 # Calf-Broker Local Development Makefile
-# Two-tier Kafka development environment
 
 # Configuration
 DOCKER_COMPOSE_FILE := deploy/docker/docker-compose.yml
@@ -9,7 +8,7 @@ KIND_CLUSTER_NAME := kafka-integration
 KAFKA_NAMESPACE := kafka
 STRIMZI_VERSION := 0.49.0
 
-.PHONY: help dev-up dev-down dev-status dev-ui dev-logs \
+.PHONY: help dev-up dev-down dev-status dev-ui dev-logs ui ui-down \
         k8s-up k8s-down k8s-kind-create k8s-status k8s-logs k8s-port-forward \
         k8s-strimzi-install k8s-kafka-deploy k8s-kafka-delete
 
@@ -26,6 +25,10 @@ help:
 	@echo "  make dev-status    Show container status"
 	@echo "  make dev-ui        Start Kafka with UI (localhost:8080)"
 	@echo "  make dev-logs      Tail Kafka logs"
+	@echo ""
+	@echo "STANDALONE UI (connects to existing Kafka):"
+	@echo "  make ui            Start Kafka UI only (localhost:8080)"
+	@echo "  make ui-down       Stop Kafka UI"
 	@echo ""
 	@echo "TIER 2 - Integration Testing (Kind + Strimzi):"
 	@echo "  make k8s-up        Create full K8s + Kafka environment"
@@ -73,6 +76,20 @@ dev-ui:
 
 dev-logs:
 	docker compose -f $(DOCKER_COMPOSE_FILE) logs -f kafka
+
+# =============================================================================
+# STANDALONE UI (connects to existing Kafka at localhost:9092)
+# =============================================================================
+
+ui:
+	@echo "Starting Kafka UI (connecting to localhost:9092)..."
+	docker compose -f $(DOCKER_COMPOSE_FILE) --profile ui-standalone up -d kafka-ui-standalone
+	@echo ""
+	@echo "Kafka UI is ready at http://localhost:8080"
+
+ui-down:
+	@echo "Stopping Kafka UI..."
+	docker compose -f $(DOCKER_COMPOSE_FILE) --profile ui-standalone down
 
 # =============================================================================
 # TIER 2: Integration Testing (Kind + Strimzi)

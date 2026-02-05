@@ -1,7 +1,6 @@
-# Tier 1: Daily Development - Apache Kafka with KRaft
 # Based on: https://github.com/apache/kafka/blob/trunk/docker/examples/
 # Usage: make dev-up / make dev-down
-# Kafka available at: localhost:9092
+# Kafka available at localhost:9092
 
 services:
   kafka:
@@ -41,7 +40,7 @@ services:
     environment:
       KAFKA_NODE_ID: 1
       KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT
-      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://127.0.0.1:9092
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://host.docker.internal:9092
       KAFKA_PROCESS_ROLES: broker,controller
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
       KAFKA_BROKER_ID: 1
@@ -66,3 +65,14 @@ services:
         condition: service_healthy
     profiles:
       - ui
+
+  kafka-ui-standalone:
+    image: provectuslabs/kafka-ui:latest
+    container_name: kafka-ui-standalone
+    ports:
+      - "8080:8080"
+    environment:
+      KAFKA_CLUSTERS_0_NAME: local
+      KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: host.docker.internal:9092
+    profiles:
+      - ui-standalone

@@ -1,4 +1,4 @@
-# Tier 2: Kind cluster configuration for integration testing
+# Kind cluster configuration
 # Usage: make k8s-up / make k8s-down
 
 kind: Cluster
