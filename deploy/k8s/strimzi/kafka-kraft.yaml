@@ -1,4 +1,4 @@
-# Tier 2: Strimzi Kafka in KRaft mode for integration testing
+# Strimzi Kafka in KRaft mode
 # Requires: Strimzi operator installed via Helm
 # Usage: make k8s-kafka-deploy
 
