@@ -1,6 +1,6 @@
-# calf-broker
+# 🐮 Calfkit Broker  [![Calfkit SDK](https://img.shields.io/badge/Calfkit-SDK-blue?logo=github)](https://github.com/calf-ai/calfkit-sdk)
 
-Local Kafka infrastructure for [Calfkit SDK](https://github.com/calf-ai/calfkit-sdk) development.
+Local Kafka infrastructure for event-driven and distributed AI agent development using [Calfkit SDK](https://github.com/calf-ai/calfkit-sdk).
 
 Provides two-tier Kafka environments using KRaft:
 
