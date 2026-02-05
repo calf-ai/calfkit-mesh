@@ -44,7 +44,7 @@ help:
 
 dev-up:
 	@echo "Starting Tier 1: Kafka development environment..."
-	docker compose -f $(DOCKER_COMPOSE_FILE) --profile confluent up -d local-broker
+	docker compose -f $(DOCKER_COMPOSE_FILE) --profile confluent up local-broker
 	@echo ""
 	@echo "Waiting for Kafka to be ready..."
 	@until docker exec local-broker kafka-topics --bootstrap-server localhost:9092 --list >/dev/null 2>&1; do \
