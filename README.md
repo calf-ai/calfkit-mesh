@@ -21,6 +21,18 @@ make dev-up
 make dev-down
 ```
 
+## Kafka UI
+
+```bash
+# Start Kafka UI (connects to existing broker at localhost:9092)
+make ui
+
+# UI available at http://localhost:8080
+
+# Stop
+make ui-down
+```
+
 ## License
 
 Apache 2.0 - see [LICENSE](LICENSE)
