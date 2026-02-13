@@ -77,3 +77,14 @@ services:
       KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: host.docker.internal:29092
     profiles:
       - ui-standalone
+
+  kafka-bridge:
+    build: ./bridge
+    container_name: kafka-bridge
+    ports:
+      - "8000:8000"
+    environment:
+      KAFKA_BOOTSTRAP_SERVERS: local-broker:29092
+    depends_on:
+      - local-broker
+    restart: unless-stopped
