@@ -151,8 +151,11 @@ jobs:
             echo "== ldd (expect static) =="
             ldd_out="$(ldd "$bin" 2>&1 || true)"
             echo "$ldd_out"
-            echo "$ldd_out" | grep -q "not a dynamic executable" \
-              || { echo "::error::binary is not statically linked"; exit 1; }
+            # A static musl binary is reported differently by different ldd implementations: glibc's ldd
+            # (on the ubuntu build host) prints "statically linked" for a static-PIE binary, while musl's
+            # ldd prints "not a dynamic executable" / "Not a valid dynamic program". Accept any of them.
+            echo "$ldd_out" | grep -qE "statically linked|not a dynamic executable|Not a valid dynamic program" \
+              || { echo "::error::binary is not statically linked: $ldd_out"; exit 1; }
           fi
 
       - name: Set up Python
