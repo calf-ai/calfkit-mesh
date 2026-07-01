@@ -24,7 +24,6 @@ defaults:
 env:
   TANSU_REF: v0.6.0
   TANSU_VERSION: "0.6.0"
-  RUST_VERSION: "1.94.0"
 
 jobs:
   build:
@@ -77,15 +76,19 @@ jobs:
           ref: ${{ env.TANSU_REF }}
           path: tansu-src
 
-      - name: Install Rust
+      - name: Install Rust (Tansu's pinned toolchain + cross target)
         env:
           TARGET: ${{ matrix.target }}
         run: |
           set -euo pipefail
-          rustup toolchain install "$RUST_VERSION" --profile minimal
-          rustup default "$RUST_VERSION"
-          rustup target add "$TARGET"
-          rustc --version
+          # Honor Tansu's own rust-toolchain.toml (channel = "1.94") so the cross
+          # target is added to the EXACT toolchain the build uses. A hard-pinned
+          # patch (e.g. 1.94.0) could mismatch the channel's latest patch, leaving
+          # the toolchain the build actually selects without the target installed.
+          channel="$(sed -nE 's/^[[:space:]]*channel[[:space:]]*=[[:space:]]*"([^"]+)".*/\1/p' tansu-src/rust-toolchain.toml)"
+          echo "Tansu pins rust channel: ${channel:?could not read channel from rust-toolchain.toml}"
+          rustup toolchain install "$channel" --profile minimal --target "$TARGET"
+          rustc +"$channel" --version
 
       - name: Install Linux build toolchain (musl + C deps)
         if: runner.os == 'Linux'

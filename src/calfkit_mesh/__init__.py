@@ -21,7 +21,7 @@ from pathlib import Path
 __all__ = ["TansuBinaryNotFound", "resolve_broker_bin", "__version__", "TANSU_VERSION"]
 
 #: Own semantic version of the calfkit-mesh package (NOT the wrapped Tansu version).
-__version__ = "0.1.0"
+__version__ = "0.1.0"  # x-release-please-version
 
 #: The upstream Tansu release wrapped by this package. Used to key the on-disk
 #: cache path so that upgrading calfkit-mesh materializes a fresh binary.
