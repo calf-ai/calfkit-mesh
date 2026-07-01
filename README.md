@@ -1,4 +1,4 @@
-# 🐮 Calfkit Broker  [![Calfkit SDK](https://img.shields.io/badge/Calfkit-SDK-blue?logo=github)](https://github.com/calf-ai/calfkit-sdk)
+# 🐮 Calfkit Mesh  [![Calfkit SDK](https://img.shields.io/badge/Calfkit-SDK-blue?logo=github)](https://github.com/calf-ai/calfkit-sdk)
 
 Local Kafka infrastructure for event-driven and distributed AI agent development using [Calfkit SDK](https://github.com/calf-ai/calfkit-sdk).
 
@@ -39,8 +39,8 @@ make ui-down
 
 For a zero-dependency local broker, this repo also publishes the
 **`calfkit-mesh`** Python package. It bundles a static, memory-only build of the
-[Tansu](https://github.com/tansu-io/tansu) broker (Apache Kafka-compatible, written
-in Rust) inside platform wheels, so `calfkit`'s `ck dev` can spawn a broker without
+[Tansu](https://github.com/tansu-io/tansu) broker (Apache Kafka-compatible)
+inside platform wheels, so `calfkit`'s `ck dev` can spawn a broker without
 Docker, JVM, or any network install:
 
 ```bash
@@ -59,13 +59,11 @@ usable `tansu` executable using this resolution order:
 3. **`tansu` on your `PATH`**.
 
 Wheels are built for Linux (`x86_64`, `aarch64`; published under both `manylinux`
-and `musllinux` tags), macOS (`arm64`, `x86_64`), and Windows (`x86_64`). The
-bundled binary is compiled from unmodified Tansu source; see [NOTICE](NOTICE) and
-[LICENSE-tansu](LICENSE-tansu) for attribution.
+and `musllinux` tags), macOS (`arm64`, `x86_64`), and Windows (`x86_64`).
 
 ## License
 
 Apache 2.0 - see [LICENSE](LICENSE).
 
-calfkit-mesh wheels bundle the Tansu broker, also Apache 2.0; see
-[NOTICE](NOTICE) and [LICENSE-tansu](LICENSE-tansu).
+The Tansu binary bundled in calfkit-mesh wheels is also Apache 2.0; see
+[NOTICE](NOTICE) for attribution.

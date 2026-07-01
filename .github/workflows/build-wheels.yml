@@ -178,7 +178,7 @@ jobs:
               assert size < max_bytes, f"{whl.name} exceeds 100MB"
               names = zipfile.ZipFile(whl).namelist()
               have = {n.rsplit("/", 1)[-1] for n in names if "/licenses/" in n}
-              for required in ("LICENSE", "NOTICE", "LICENSE-tansu"):
+              for required in ("LICENSE", "NOTICE"):
                   assert required in have, f"{whl.name} missing {required}"
               assert any(n.startswith("calfkit_mesh/bin/tansu") for n in names), \
                   f"{whl.name} missing bundled binary"
