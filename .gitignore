@@ -24,3 +24,20 @@ kubeconfig
 # Temporary files
 tmp/
 .tmp/
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+dist/
+build/
+*.egg-info/
+.pytest_cache/
+.ruff_cache/
+
+# Rust
+target/
+
+# Staged Tansu binary (built in CI, force-included into the wheel)
+src/calfkit_mesh/bin/tansu
+src/calfkit_mesh/bin/tansu.exe

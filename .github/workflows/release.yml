@@ -1,0 +1,47 @@
+name: Release
+
+# Publishes calfkit-mesh wheels to PyPI on a version tag (e.g. v0.1.0).
+# Builds every platform wheel via the reusable build-wheels workflow, then
+# gathers all artifacts and publishes them in a single job using PyPI's
+# trusted publishing (OIDC) -- no long-lived API token.
+
+on:
+  push:
+    tags:
+      - "v*"
+
+permissions: {}
+
+jobs:
+  build:
+    permissions:
+      contents: read
+    uses: ./.github/workflows/build-wheels.yml
+
+  publish:
+    name: Publish to PyPI
+    needs: build
+    runs-on: ubuntu-latest
+    # Trusted publisher must be configured for this environment on PyPI.
+    environment:
+      name: pypi
+      url: https://pypi.org/project/calfkit-mesh/
+    permissions:
+      id-token: write # OIDC token for trusted publishing.
+    steps:
+      - name: Download all wheels
+        uses: actions/download-artifact@v4
+        with:
+          path: dist
+          pattern: wheels-*
+          merge-multiple: true
+
+      - name: List artifacts
+        run: ls -l dist
+
+      - name: Publish to PyPI
+        uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          packages-dir: dist
+          # Wheels only; there is no sdist to publish.
+          print-hash: true
