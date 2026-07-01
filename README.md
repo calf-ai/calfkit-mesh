@@ -1,4 +1,4 @@
-# 🐮 Calfkit Mesh  [![Calfkit SDK](https://img.shields.io/badge/Calfkit-SDK-blue?logo=github)](https://github.com/calf-ai/calfkit-sdk) [![PyPI](https://img.shields.io/pypi/v/calfkit-mesh)](https://pypi.org/project/calfkit-mesh/) [![License](https://img.shields.io/pypi/l/calfkit-mesh)](https://github.com/calf-ai/calfkit-mesh/blob/main/LICENSE)
+# 🐮 Calfkit Mesh  [![calfkit sdk](https://img.shields.io/badge/calfkit-sdk-blue?logo=github)](https://github.com/calf-ai/calfkit-sdk) [![PyPI](https://img.shields.io/pypi/v/calfkit-mesh)](https://pypi.org/project/calfkit-mesh/) [![License](https://img.shields.io/pypi/l/calfkit-mesh)](https://github.com/calf-ai/calfkit-mesh/blob/main/LICENSE)
 
 Local Kafka infrastructure for event-driven and distributed AI agent development using [Calfkit SDK](https://github.com/calf-ai/calfkit-sdk).
 
