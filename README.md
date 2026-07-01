@@ -37,7 +37,7 @@ make ui-down
 
 ## `calfkit-mesh` pip package
 
-For a zero-dependency local broker, `calfkit-broker` also publishes the
+For a zero-dependency local broker, this repo also publishes the
 **`calfkit-mesh`** Python package. It bundles a static, memory-only build of the
 [Tansu](https://github.com/tansu-io/tansu) broker (Apache Kafka-compatible, written
 in Rust) inside platform wheels, so `calfkit`'s `ck dev` can spawn a broker without
