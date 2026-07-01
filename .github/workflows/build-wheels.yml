@@ -16,6 +16,12 @@ on:
       - ".github/workflows/build-wheels.yml"
   workflow_dispatch:
 
+# Cancel an in-progress run for the same PR/branch when a newer commit supersedes it, so
+# stacked pushes don't pile up redundant (and expensive) matrix builds.
+concurrency:
+  group: build-wheels-${{ github.head_ref || github.ref }}
+  cancel-in-progress: true
+
 defaults:
   run:
     # Use bash on every runner (Git Bash on Windows) so one script covers all legs.
