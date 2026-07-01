@@ -55,7 +55,9 @@ jobs:
             tags: "macosx_11_0_arm64"
             macos_deployment_target: "11.0"
           - name: macos-x86_64
-            os: macos-13
+            # macos-13 (the previous Intel image) was retired 2025-12-04 — jobs queue forever.
+            # macos-15-intel is GitHub's last x86_64 macOS image, available until August 2027.
+            os: macos-15-intel
             target: x86_64-apple-darwin
             tags: "macosx_10_12_x86_64"
             macos_deployment_target: "10.12"
