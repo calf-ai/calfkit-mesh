@@ -1,0 +1,193 @@
+name: Build wheels
+
+# Builds the calfkit-mesh platform wheels: each leg compiles the Tansu v0.6.0
+# broker from source (static musl on Linux), stages the binary, and produces
+# one or more platform-tagged wheels. Reusable via workflow_call from release.yml
+# and run directly for CI validation.
+
+on:
+  workflow_call:
+  pull_request:
+    paths:
+      - "pyproject.toml"
+      - "hatch_build.py"
+      - "src/**"
+      - "tests/**"
+      - ".github/workflows/build-wheels.yml"
+  workflow_dispatch:
+
+# Cancel an in-progress run for the same PR/branch when a newer commit supersedes it, so
+# stacked pushes don't pile up redundant (and expensive) matrix builds.
+concurrency:
+  group: build-wheels-${{ github.head_ref || github.ref }}
+  cancel-in-progress: true
+
+defaults:
+  run:
+    # Use bash on every runner (Git Bash on Windows) so one script covers all legs.
+    shell: bash
+
+env:
+  TANSU_REF: v0.6.0
+  TANSU_VERSION: "0.6.0"
+
+jobs:
+  build:
+    name: ${{ matrix.name }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: linux-x86_64
+            os: ubuntu-latest
+            target: x86_64-unknown-linux-musl
+            # One static musl binary, published under BOTH libc tags: pip's tag
+            # match is libc-specific, so manylinux-only would not install on Alpine.
+            tags: "manylinux2014_x86_64 musllinux_1_1_x86_64"
+          - name: linux-aarch64
+            os: ubuntu-24.04-arm
+            target: aarch64-unknown-linux-musl
+            tags: "manylinux2014_aarch64 musllinux_1_1_aarch64"
+          - name: macos-arm64
+            os: macos-14
+            target: aarch64-apple-darwin
+            tags: "macosx_11_0_arm64"
+            macos_deployment_target: "11.0"
+          - name: macos-x86_64
+            # macos-13 (the previous Intel image) was retired 2025-12-04 — jobs queue forever.
+            # macos-15-intel is GitHub's last x86_64 macOS image, available until August 2027.
+            os: macos-15-intel
+            target: x86_64-apple-darwin
+            tags: "macosx_10_12_x86_64"
+            macos_deployment_target: "10.12"
+          # No Windows leg: Tansu is Unix-only (uses tokio::signal::unix unconditionally), so a
+          # windows-msvc wheel cannot build. Windows users set CALF_TANSU_BIN or use WSL2.
+
+    steps:
+      - name: Checkout calfkit-mesh
+        uses: actions/checkout@v4
+
+      - name: Checkout Tansu
+        uses: actions/checkout@v4
+        with:
+          repository: tansu-io/tansu
+          ref: ${{ env.TANSU_REF }}
+          path: tansu-src
+
+      - name: Install Rust (Tansu's pinned toolchain + cross target)
+        env:
+          TARGET: ${{ matrix.target }}
+        run: |
+          set -euo pipefail
+          # Honor Tansu's own rust-toolchain.toml (channel = "1.94") so the cross
+          # target is added to the EXACT toolchain the build uses. A hard-pinned
+          # patch (e.g. 1.94.0) could mismatch the channel's latest patch, leaving
+          # the toolchain the build actually selects without the target installed.
+          channel="$(sed -nE 's/^[[:space:]]*channel[[:space:]]*=[[:space:]]*"([^"]+)".*/\1/p' tansu-src/rust-toolchain.toml)"
+          echo "Tansu pins rust channel: ${channel:?could not read channel from rust-toolchain.toml}"
+          rustup toolchain install "$channel" --profile minimal --target "$TARGET"
+          rustc +"$channel" --version
+
+      - name: Install Linux build toolchain (musl + C deps)
+        if: runner.os == 'Linux'
+        run: |
+          set -euo pipefail
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends \
+            musl-tools musl-dev clang cmake perl pkg-config build-essential
+
+      - name: Install macOS build toolchain (cmake)
+        if: runner.os == 'macOS'
+        run: brew list cmake >/dev/null 2>&1 || brew install cmake
+
+      - name: Build Tansu (release, dynostore-only)
+        working-directory: tansu-src
+        env:
+          TARGET: ${{ matrix.target }}
+          # Native musl builds use musl-gcc for any C dependencies.
+          CC_x86_64_unknown_linux_musl: musl-gcc
+          CC_aarch64_unknown_linux_musl: musl-gcc
+          # Pin the macOS ABI floor so the wheel's platform tag is honest.
+          MACOSX_DEPLOYMENT_TARGET: ${{ matrix.macos_deployment_target }}
+        run: |
+          set -euo pipefail
+          cargo build --release --target "$TARGET" \
+            -p tansu --bin tansu --no-default-features --features dynostore
+
+      - name: Stage binary + strip
+        env:
+          TARGET: ${{ matrix.target }}
+        run: |
+          set -euo pipefail
+          mkdir -p src/calfkit_mesh/bin
+          cp "tansu-src/target/$TARGET/release/tansu" src/calfkit_mesh/bin/tansu
+          strip src/calfkit_mesh/bin/tansu
+
+      - name: Assert binary version and linkage
+        run: |
+          set -euo pipefail
+          bin="src/calfkit_mesh/bin/tansu"
+          echo "== $bin --version =="
+          out="$("$bin" --version)"
+          echo "$out"
+          echo "$out" | grep -q "$TANSU_VERSION" \
+            || { echo "::error::expected Tansu $TANSU_VERSION, got: $out"; exit 1; }
+          if [ "$RUNNER_OS" = "Linux" ]; then
+            echo "== ldd (expect static) =="
+            ldd_out="$(ldd "$bin" 2>&1 || true)"
+            echo "$ldd_out"
+            # A static musl binary is reported differently by different ldd implementations: glibc's ldd
+            # (on the ubuntu build host) prints "statically linked" for a static-PIE binary, while musl's
+            # ldd prints "not a dynamic executable" / "Not a valid dynamic program". Accept any of them.
+            echo "$ldd_out" | grep -qE "statically linked|not a dynamic executable|Not a valid dynamic program" \
+              || { echo "::error::binary is not statically linked: $ldd_out"; exit 1; }
+          fi
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+
+      - name: Build wheels (one per platform tag, wheels-only)
+        env:
+          TAGS: ${{ matrix.tags }}
+        run: |
+          set -euo pipefail
+          rm -rf dist
+          for tag in $TAGS; do
+            echo "== building wheel for $tag =="
+            CALFKIT_MESH_PLAT_TAG="$tag" uv build --wheel --out-dir dist
+          done
+          ls -l dist
+
+      - name: Assert wheel contents (size < 100MB, licenses present)
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import pathlib, zipfile
+          wheels = sorted(pathlib.Path("dist").glob("*.whl"))
+          assert wheels, "no wheels produced"
+          max_bytes = 100 * 1024 * 1024
+          for whl in wheels:
+              size = whl.stat().st_size
+              print(f"{whl.name}: {size/1024/1024:.1f} MiB")
+              assert size < max_bytes, f"{whl.name} exceeds 100MB"
+              names = zipfile.ZipFile(whl).namelist()
+              have = {n.rsplit("/", 1)[-1] for n in names if "/licenses/" in n}
+              for required in ("LICENSE", "NOTICE", "LICENSE-tansu"):
+                  assert required in have, f"{whl.name} missing {required}"
+              assert any(n.startswith("calfkit_mesh/bin/tansu") for n in names), \
+                  f"{whl.name} missing bundled binary"
+          print("OK:", ", ".join(w.name for w in wheels))
+          PY
+
+      - name: Upload wheels
+        uses: actions/upload-artifact@v4
+        with:
+          name: wheels-${{ matrix.name }}
+          path: dist/*.whl
+          if-no-files-found: error

@@ -35,6 +35,37 @@ make ui
 make ui-down
 ```
 
+## `calfkit-mesh` pip package
+
+For a zero-dependency local broker, this repo also publishes the
+**`calfkit-mesh`** Python package. It bundles a static, memory-only build of the
+[Tansu](https://github.com/tansu-io/tansu) broker (Apache Kafka-compatible, written
+in Rust) inside platform wheels, so `calfkit`'s `ck dev` can spawn a broker without
+Docker, JVM, or any network install:
+
+```bash
+pip install calfkit-mesh
+```
+
+This is the upstream of calfkit's opt-in `[mesh]` extra. The package exposes a
+single locator, `calfkit_mesh.resolve_broker_bin()`, which returns the path to a
+usable `tansu` executable using this resolution order:
+
+1. **`$CALF_TANSU_BIN`** — if set, it is used verbatim (and must point at an
+   executable file, or resolution fails). Use this to point `ck dev` at your own
+   `tansu` build.
+2. **The wheel-bundled binary** — materialized once to a stable cache path
+   (`~/.calfkit/bin/tansu-<version>`) and made executable.
+3. **`tansu` on your `PATH`**.
+
+Wheels are built for Linux (`x86_64`, `aarch64`; published under both `manylinux`
+and `musllinux` tags), macOS (`arm64`, `x86_64`), and Windows (`x86_64`). The
+bundled binary is compiled from unmodified Tansu source; see [NOTICE](NOTICE) and
+[LICENSE-tansu](LICENSE-tansu) for attribution.
+
 ## License
 
-Apache 2.0 - see [LICENSE](LICENSE)
+Apache 2.0 - see [LICENSE](LICENSE).
+
+calfkit-mesh wheels bundle the Tansu broker, also Apache 2.0; see
+[NOTICE](NOTICE) and [LICENSE-tansu](LICENSE-tansu).

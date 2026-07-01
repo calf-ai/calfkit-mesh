@@ -1,0 +1,31 @@
+calfkit-mesh
+Copyright 2026 Ryan Yu
+
+This product is licensed under the Apache License, Version 2.0 (see LICENSE).
+
+==============================================================================
+Bundled third-party software
+==============================================================================
+
+## Tansu
+
+- Component: Tansu (`tansu` broker), an Apache Kafka-compatible broker.
+- Source:    https://github.com/tansu-io/tansu
+- Version:   v0.6.0 (commit 079c4c334a0e9240933d208ecd38c1127526e89c)
+- Obtained:  2026-07-01
+- License:   Apache-2.0 (full text in LICENSE-tansu)
+- Author:    Peter Morgan <peter.morgan@tansu.io> and contributors
+- Homepage:  https://tansu.io
+- Files:     the precompiled `tansu` executable shipped at
+             `calfkit_mesh/bin/tansu` (or `tansu.exe`) inside platform wheels.
+
+Modifications: none to the Tansu source. The binary is compiled from unmodified
+Tansu v0.6.0 source; only compile-time feature selection is applied via cargo
+flags to produce a static, memory-only build:
+
+    cargo build --release -p tansu --bin tansu \
+        --no-default-features --features dynostore
+
+The upstream Tansu project does not distribute a NOTICE file (verified at tag
+v0.6.0). This NOTICE is provided by calfkit-mesh to attribute the bundled Tansu
+binary and its Apache-2.0 license, satisfying Apache License 2.0 section 4.

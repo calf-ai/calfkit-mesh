@@ -1,0 +1,66 @@
+[build-system]
+requires = ["hatchling>=1.27"]
+build-backend = "hatchling.build"
+
+[project]
+name = "calfkit-mesh"
+dynamic = ["version"]
+description = "Vendored, memory-only Tansu (Kafka-compatible) broker binary for local calfkit development."
+readme = "README.md"
+requires-python = ">=3.10"
+license = "Apache-2.0"
+license-files = ["LICENSE", "NOTICE", "LICENSE-tansu"]
+authors = [{ name = "Ryan Yu" }]
+keywords = ["kafka", "tansu", "broker", "calfkit", "mesh", "event-driven"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "Operating System :: MacOS",
+    "Operating System :: Microsoft :: Windows",
+    "Operating System :: POSIX :: Linux",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3 :: Only",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
+    "Programming Language :: Rust",
+    "Topic :: Software Development :: Libraries",
+    "Topic :: System :: Distributed Computing",
+]
+dependencies = []
+
+[project.urls]
+Homepage = "https://github.com/calf-ai/calfkit-mesh"
+Source = "https://github.com/calf-ai/calfkit-mesh"
+"Calfkit SDK" = "https://github.com/calf-ai/calfkit-sdk"
+"Upstream broker (Tansu)" = "https://github.com/tansu-io/tansu"
+
+# calfkit-mesh's own semver lives in the package; the wrapped upstream Tansu
+# release is recorded here (and mirrored by calfkit_mesh.TANSU_VERSION) so it is
+# discoverable from project metadata.
+[tool.calfkit-mesh]
+tansu_version = "v0.6.0"
+
+[tool.hatch.version]
+path = "src/calfkit_mesh/__init__.py"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/calfkit_mesh"]
+
+# Custom build hook (hatch_build.py) force-includes the staged Tansu binary and
+# emits a non-pure, platform-tagged wheel. Scoped to the wheel target so source
+# checkouts and editable/test workflows never require the binary.
+[tool.hatch.build.targets.wheel.hooks.custom]
+path = "hatch_build.py"
+
+# No sdist is published: calfkit-mesh is meaningless without its prebuilt binary,
+# which is staged only in CI. Wheels are the sole distribution artifact.
+
+[tool.pytest.ini_options]
+# Import calfkit_mesh straight from src/ so the test suite never builds the
+# package (and therefore never needs a staged binary).
+pythonpath = ["src"]
+testpaths = ["tests"]
+addopts = "-ra"

@@ -1,0 +1,71 @@
+name: Release
+
+# release-please (the same pattern calfkit uses): on every push to main it keeps a
+# release PR up to date (own-semver bump from Conventional Commits + CHANGELOG).
+# Merging that PR creates the tag + GitHub release; the build + publish jobs then
+# run IN THIS SAME workflow run, gated on `release_created` -- so we never depend on
+# a release-please-created tag to trigger a separate workflow (the default
+# GITHUB_TOKEN can't trigger workflow-on-tag, which is why publish is inlined here).
+
+on:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  release-please:
+    name: Release Please
+    runs-on: ubuntu-latest
+    outputs:
+      release_created: ${{ steps.release.outputs.release_created }}
+      tag_name: ${{ steps.release.outputs.tag_name }}
+      version: ${{ steps.release.outputs.version }}
+    steps:
+      - name: Run release-please
+        id: release
+        uses: googleapis/release-please-action@v5
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+  # Only when release-please cut a release: build every platform wheel...
+  build:
+    name: Build wheels
+    needs: release-please
+    if: needs.release-please.outputs.release_created == 'true'
+    permissions:
+      contents: read
+    uses: ./.github/workflows/build-wheels.yml
+
+  # ...then gather all artifacts and publish them in one trusted-publishing job.
+  publish:
+    name: Publish to PyPI
+    needs: [release-please, build]
+    if: needs.release-please.outputs.release_created == 'true'
+    runs-on: ubuntu-latest
+    # A PyPI trusted publisher must be configured for this environment (see the PR).
+    environment:
+      name: pypi
+      url: https://pypi.org/project/calfkit-mesh/
+    permissions:
+      id-token: write # OIDC token for trusted publishing -- no long-lived API token.
+    steps:
+      - name: Download all wheels
+        uses: actions/download-artifact@v4
+        with:
+          path: dist
+          pattern: wheels-*
+          merge-multiple: true
+
+      - name: List artifacts
+        run: ls -l dist
+
+      - name: Publish to PyPI
+        uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          packages-dir: dist
+          # Wheels only; there is no sdist to publish.
+          print-hash: true
