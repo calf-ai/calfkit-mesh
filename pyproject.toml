@@ -5,13 +5,13 @@ build-backend = "hatchling.build"
 [project]
 name = "calfkit-mesh"
 dynamic = ["version"]
-description = "Vendored, memory-only Tansu (Kafka-compatible) broker binary for local calfkit development."
+description = "Vendored, memory-only Kafka-compatible broker binary for local calfkit development."
 readme = "README.md"
 requires-python = ">=3.10"
 license = "Apache-2.0"
-license-files = ["LICENSE", "NOTICE", "LICENSE-tansu"]
+license-files = ["LICENSE", "NOTICE"]
 authors = [{ name = "Ryan Yu" }]
-keywords = ["kafka", "tansu", "broker", "calfkit", "mesh", "event-driven"]
+keywords = ["kafka", "broker", "calfkit", "mesh", "event-driven"]
 classifiers = [
     "Development Status :: 3 - Alpha",
     "Intended Audience :: Developers",
@@ -35,7 +35,6 @@ dependencies = []
 Homepage = "https://github.com/calf-ai/calfkit-mesh"
 Source = "https://github.com/calf-ai/calfkit-mesh"
 "Calfkit SDK" = "https://github.com/calf-ai/calfkit-sdk"
-"Upstream broker (Tansu)" = "https://github.com/tansu-io/tansu"
 
 # calfkit-mesh's own semver lives in the package; the wrapped upstream Tansu
 # release is recorded here (and mirrored by calfkit_mesh.TANSU_VERSION) so it is

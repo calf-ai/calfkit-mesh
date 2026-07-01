@@ -1,8 +1,7 @@
-"""calfkit-mesh: a vendored, memory-only Tansu broker binary for local calfkit development.
+"""calfkit-mesh: a vendored, memory-only Kafka-compatible broker binary for local calfkit development.
 
 This package ships a statically linked, prebuilt `tansu` broker binary inside
-platform-specific wheels. Tansu (https://github.com/tansu-io/tansu) is an
-Apache Kafka-compatible broker written in Rust and licensed under Apache-2.0.
+platform-specific wheels; see the bundled NOTICE file for upstream attribution.
 
 The only public surface is :func:`resolve_broker_bin`, which locates a usable
 `tansu` executable for calfkit's ``ck dev`` to spawn. It has zero runtime
