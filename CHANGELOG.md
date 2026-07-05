@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.2](https://github.com/calf-ai/calfkit-mesh/compare/v0.1.1...v0.1.2) (2026-07-05)
+
+
+### Bug Fixes
+
+* build Tansu from post-v0.6.0 main to pick up consumer-group fixes ([#11](https://github.com/calf-ai/calfkit-mesh/issues/11)) ([c31d1ca](https://github.com/calf-ai/calfkit-mesh/commit/c31d1ca3ab8cd3d227bac32c701fa4432da1d8e5))
+
 ## [0.1.1](https://github.com/calf-ai/calfkit-mesh/compare/v0.1.0...v0.1.1) (2026-07-01)
 
 
