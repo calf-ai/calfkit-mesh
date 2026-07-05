@@ -37,10 +37,11 @@ Source = "https://github.com/calf-ai/calfkit-mesh"
 "Calfkit SDK" = "https://github.com/calf-ai/calfkit-sdk"
 
 # calfkit-mesh's own semver lives in the package; the wrapped upstream Tansu
-# release is recorded here (and mirrored by calfkit_mesh.TANSU_VERSION) so it is
-# discoverable from project metadata.
+# build is recorded here (and mirrored by calfkit_mesh.TANSU_VERSION) so it is
+# discoverable from project metadata. Encodes the commit SHA because the build
+# currently tracks a post-v0.6.0 main commit (consumer-group fixes).
 [tool.calfkit-mesh]
-tansu_version = "v0.6.0"
+tansu_version = "v0.6.0-510f3e2"
 
 [tool.hatch.version]
 path = "src/calfkit_mesh/__init__.py"

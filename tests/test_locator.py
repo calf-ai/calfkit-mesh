@@ -193,8 +193,8 @@ def test_all_absent_raises(monkeypatch):
 
 
 def test_version_metadata():
-    assert calfkit_mesh.__version__ == "0.1.0"
-    assert TANSU_VERSION == "v0.6.0"
+    assert calfkit_mesh.__version__ == "0.1.1"
+    assert TANSU_VERSION == "v0.6.0-510f3e2"
 
 
 def test_import_pulls_no_heavy_deps():

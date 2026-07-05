@@ -1,9 +1,19 @@
 name: Build wheels
 
-# Builds the calfkit-mesh platform wheels: each leg compiles the Tansu v0.6.0
-# broker from source (static musl on Linux), stages the binary, and produces
-# one or more platform-tagged wheels. Reusable via workflow_call from release.yml
-# and run directly for CI validation.
+# Builds the calfkit-mesh platform wheels: each leg compiles Tansu from source
+# (static musl on Linux), stages the binary, and produces one or more
+# platform-tagged wheels. Reusable via workflow_call from release.yml and run
+# directly for CI validation.
+#
+# TANSU_REF pins the upstream commit calfkit-mesh builds from. It currently
+# tracks a post-v0.6.0 commit on main that fixes three consumer-group /
+# metadata bugs that cause silent partition-assignment loss in single-member
+# consumer groups (the exact pattern calfkit's per-tool / per-agent subscribers
+# hit). Once Tansu tags a release containing these fixes, switch TANSU_REF back
+# to a tag. The relevant upstream fixes (all between v0.6.0 and this commit):
+#   - 50e5666: fix group coordinator generation_id and sync_group assignment
+#   - b61fa72: storage: auto topic creation on MetadataRequest
+#   - 4ce7c46: fix: populate SyncGroupResponse member_assignment payload
 
 on:
   workflow_call:
@@ -28,7 +38,10 @@ defaults:
     shell: bash
 
 env:
-  TANSU_REF: v0.6.0
+  # Post-v0.6.0 main commit (510f3e2): includes consumer-group partition
+  # assignment + metadata fixes not in any tagged release yet. The binary's
+  # --version still reports "0.6.0" (workspace version unchanged upstream).
+  TANSU_REF: 510f3e2bd367fd19e6c9473aea02ec9bc30df085
   TANSU_VERSION: "0.6.0"
 
 jobs:

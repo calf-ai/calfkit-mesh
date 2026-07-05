@@ -22,9 +22,14 @@ __all__ = ["TansuBinaryNotFound", "resolve_broker_bin", "__version__", "TANSU_VE
 #: Own semantic version of the calfkit-mesh package (NOT the wrapped Tansu version).
 __version__ = "0.1.1"  # x-release-please-version
 
-#: The upstream Tansu release wrapped by this package. Used to key the on-disk
-#: cache path so that upgrading calfkit-mesh materializes a fresh binary.
-TANSU_VERSION = "v0.6.0"
+#: The upstream Tansu build calfkit-mesh wraps. Used to key the on-disk cache
+#: path so that upgrading calfkit-mesh materialises a fresh binary. The value
+#: encodes both the upstream workspace version ("0.6.0") and the short SHA of
+#: the exact commit built from, because the broker is currently pinned to a
+#: post-v0.6.0 main commit that includes consumer-group fixes not in any tagged
+#: release. Once Tansu tags a release with these fixes this can return to a
+#: plain "vX.Y.Z" form.
+TANSU_VERSION = "v0.6.0-510f3e2"
 
 #: Environment variable an operator may set to point at an explicit `tansu` binary.
 ENV_VAR = "CALF_TANSU_BIN"
